@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>Roomba cuadrícula S3</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>Roomba cuadrícula <small>S3</small></h1>
+  <div class="chips">
+    <span id="conn" class="chip off">sin conexión</span>
+    <span id="estado" class="chip">—</span>
+  </div>
+  <button id="btnParo" class="paro">PARO</button>
+</header>
+
+<main>
+  <section class="card mapa">
+    <div class="tools" role="toolbar">
+      <button data-tool="inicio" class="tool on">Inicio ↻</button>
+      <button data-tool="obstaculo" class="tool">Obstáculo</button>
+      <button data-tool="meta" class="tool">Meta</button>
+      <button data-tool="borrar" class="tool">Borrar</button>
+    </div>
+    <svg id="grid" viewBox="-30 -10 340 340" aria-label="Cuadrícula de 6 por 6"></svg>
+    <p class="hint">Fila 0 abajo, columna 0 a la izquierda; N hacia arriba. Con «Inicio», toca la celda de inicio otra vez para girar la flecha.</p>
+    <div class="row">
+      <button id="btnLimpiarMetas">Quitar metas</button>
+      <button id="btnLimpiarObs">Quitar obstáculos</button>
+      <button id="btnGuardarMapa">Guardar mapa</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Plan</h2>
+    <div class="row">
+      <label>Algoritmo
+        <select id="alg">
+          <option value="astar">A*</option>
+          <option value="bfs">BFS</option>
+          <option value="dfs">DFS</option>
+          <option value="ucs">UCS</option>
+        </select>
+      </label>
+      <label id="heurBox">Heurística
+        <select id="heur">
+          <option value="manhattan">Manhattan</option>
+          <option value="manhattan_giros">Manhattan + giros</option>
+        </select>
+      </label>
+      <label class="check"><input type="checkbox" id="regresar"> regresar al inicio</label>
+    </div>
+    <div class="row">
+      <button id="btnPlan" class="primary">Planear</button>
+      <button id="btnEjecutar" class="primary">Ejecutar</button>
+      <button id="btnPausa">Pausa / reanudar</button>
+      <button id="btnAnimar">Ver expansión</button>
+    </div>
+    <div id="planInfo" class="info">Marca inicio y metas, elige algoritmo y pulsa Planear.</div>
+    <table class="metrics" id="metricas">
+      <tr><th>Orden</th><td id="mOrden">—</td></tr>
+      <tr><th>Celdas</th><td id="mCeldas">—</td></tr>
+      <tr><th>Giros de 90°</th><td id="mGiros">—</td></tr>
+      <tr><th>Costo</th><td id="mCosto">—</td></tr>
+      <tr><th>Nodos expandidos</th><td id="mExp">—</td></tr>
+      <tr><th>Tiempo de cómputo</th><td id="mTiempo">—</td></tr>
+      <tr><th>Primitivas</th><td id="mPrim">—</td></tr>
+    </table>
+  </section>
+
+  <section class="card">
+    <h2>Telemetría</h2>
+    <div class="tele">
+      <div><span>Misión</span><b id="tEstado">—</b></div>
+      <div><span>Mensaje</span><b id="tMensaje">—</b></div>
+      <div><span>Primitiva</span><b id="tPrim">—</b></div>
+      <div><span>Paso</span><b id="tPaso">—</b></div>
+      <div class="wide"><span>Progreso</span><progress id="tProg" max="1" value="0"></progress></div>
+      <div><span>x, y</span><b id="tXY">—</b></div>
+      <div><span>θ</span><b id="tTh">—</b></div>
+      <div><span>Celda</span><b id="tCelda">—</b></div>
+      <div><span>Movimiento</span><b id="tMov">—</b></div>
+      <div><span>Velocidad izq / der</span><b id="tV">—</b></div>
+      <div><span>Cuentas izq / der</span><b id="tTicks">—</b></div>
+      <div><span>Deslizamientos</span><b id="tSlip">—</b></div>
+      <div class="wide"><span>MPU6050 (sesgo · ω · calibración)</span><b id="tCal">—</b></div>
+      <div class="wide"><span>Red</span><b id="tRed">—</b></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Historial para comparar algoritmos</h2>
+    <div class="scroll">
+      <table class="hist" id="hist">
+        <thead><tr><th>#</th><th>Alg.</th><th>Metas</th><th>Celdas</th><th>Giros</th><th>Costo</th><th>Expand.</th><th>µs</th><th>Ejec. s</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="row">
+      <button id="btnCSV">Exportar CSV</button>
+      <button id="btnBorrarHist">Borrar historial</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Pruebas y calibración</h2>
+    <p class="hint">Una primitiva suelta desde donde esté el robot. Útil para las 20 repeticiones del plan de pruebas.</p>
+    <div class="row">
+      <button data-prueba='{"tipo":"avanzar","celdas":1}'>AVANZAR(1)</button>
+      <button data-prueba='{"tipo":"avanzar","celdas":5}'>AVANZAR(5)</button>
+      <button data-prueba='{"tipo":"girar","grados":90}'>GIRAR(+90°)</button>
+      <button data-prueba='{"tipo":"girar","grados":-90}'>GIRAR(−90°)</button>
+      <button data-prueba='{"tipo":"girar","grados":180}'>GIRAR(180°)</button>
+    </div>
+    <div class="row">
+      <label>PWM izq <input id="pwmL" type="number" step="0.05" min="-1" max="1" value="0.3"></label>
+      <label>PWM der <input id="pwmR" type="number" step="0.05" min="-1" max="1" value="0.3"></label>
+      <label>ms <input id="pwmMs" type="number" step="100" min="100" max="5000" value="1000"></label>
+      <button id="btnPWM">Probar PWM</button>
+    </div>
+    <div class="row">
+      <button id="btnCero">Colocar robot en el inicio marcado</button>
+      <button id="btnBarredora">Probar barredora</button>
+      <button id="btnCalibrar">Calibrar giroscopio (quieto 5 s)</button>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Ajustes</h2>
+    <form id="cfg" class="cfg"></form>
+    <div class="row">
+      <button id="btnCfgGuardar" class="primary">Guardar ajustes</button>
+      <button id="btnCfgReset">Valores de fábrica</button>
+    </div>
+    <details>
+      <summary>Wi-Fi</summary>
+      <div class="row">
+        <label>Modo
+          <select id="wifiModo"><option value="ap">Punto de acceso propio</option><option value="sta">Conectarse a una red</option></select>
+        </label>
+        <label>Red <input id="wifiSsid" autocomplete="off"></label>
+        <label>Clave <input id="wifiClave" type="password" autocomplete="off"></label>
+        <button id="btnWifi">Guardar y reiniciar</button>
+      </div>
+      <p class="hint">Si no conecta en 15 s, vuelve a crear su propia red.</p>
+    </details>
+  </section>
+</main>
+
+<div id="toast" class="toast" hidden></div>
+<script src="app.js"></script>
+</body>
+</html>
