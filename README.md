@@ -37,7 +37,7 @@ rmb-S3-EC-6050/
 | Señal | GPIO | Notas |
 | --- | --- | --- |
 | BTS7960 izq. LPWM (atrás) | 38 | En la DevKitC-1 **v1.1** el LED RGB de la placa está en el 38: parpadeará con el PWM (inofensivo) |
-| BTS7960 izq. RPWM (adelante) | 37 | ⚠ Ver "Módulos con PSRAM octal" abajo |
+| BTS7960 izq. RPWM (adelante) | **40** | Era 37, pero en el módulo N16R8 el 37 es de la PSRAM octal y reiniciaba la placa |
 | BTS7960 izq. EN (R_EN + L_EN) | 39 | 10 kΩ a GND |
 | BTS7960 der. LPWM (atrás) | 16 | |
 | BTS7960 der. RPWM (adelante) | 15 | |
@@ -50,7 +50,7 @@ rmb-S3-EC-6050/
 | Botón paro / inicio | **5** | A GND, INPUT_PULLUP (en la Propuesta A estaba en el 4, que ahora es la barredora) |
 | LED de estado | **6** | LED externo con 330 Ω a GND (el RGB de la placa choca con 38/48) |
 
-**No uses** en el S3: 19/20 (USB nativo), 43/44 (UART0: el monitor serie), 26–32 (flash), 0/3/46 (arranque).
+**No uses** en el S3: 19/20 (USB nativo), 43/44 (UART0: el monitor serie), 26–32 (flash), 33–37 (PSRAM octal del N16R8), 0/3/46 (arranque).
 
 ### Advertencias de pines (revísalas antes de conectar)
 
@@ -59,10 +59,9 @@ rmb-S3-EC-6050/
    salidas push-pull, la línea A puede quedar en alto según la posición de la rueda.
    Si te pasa: mueve ese cable al **GPIO 47** y cambia `PIN_ENC_L_A = 47` en `roomba_config.h`.
    (No pongas pull-up externo en el 45; el firmware activa el interno después de arrancar.)
-2. **Módulos con PSRAM octal (N8R8, N16R8, N32R8)**: dentro del módulo, los GPIO 35, 36 y 37 van a la PSRAM.
-   Mira lo que dice la lata metálica del módulo. Si dice **R8**, el 37 (RPWM izq.) no es seguro:
-   muévelo al **GPIO 40** y pon `PIN_L_RPWM = 40`. Con N8, N16 o R2 (PSRAM quad) no hay problema.
-   El firmware no activa la PSRAM.
+2. **El módulo es N16R8** (16 MB de flash, 8 MB de PSRAM octal). Dentro del módulo, los GPIO 33–37 van a la PSRAM:
+   configurar el 37 como salida reiniciaba la placa en bucle (`rst:0x1 (POWERON)`). Por eso RPWM izq. está en el **40**.
+   `platformio.ini` ya está configurado para N16R8 (flash 16 MB QIO, PSRAM OPI).
 3. **LED RGB de la placa**: está en el 48 (DevKitC-1 v1.0) o en el 38 (v1.1). No estorba, solo puede encenderse
    con colores raros. Por eso el LED de estado es uno externo en el 6.
 4. Los encoders y la MPU6050 van a **3.3 V**: el S3 no tolera 5 V en sus entradas.

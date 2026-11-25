@@ -9,9 +9,9 @@
 //
 //  Mapa de pines (ver README, sección "Pines del ESP32-S3"):
 //    enc izq A/B 45/48 · enc der A/B 10/11
-//    BTS izq LPWM 38 RPWM 37 EN 39 · BTS der LPWM 16 RPWM 15 EN 17
+//    BTS izq LPWM 38 RPWM 40 EN 39 · BTS der LPWM 16 RPWM 15 EN 17
 //    barredora 4 · I2C SDA 8 SCL 9 · botón 5 · LED de estado 6
-//  Prohibidos en el S3: 19/20 (USB), 43/44 (UART0, monitor serie), 26–32 (flash),
+//  Prohibidos en el S3: 19/20 (USB), 43/44 (UART0, monitor serie), 26–32 (flash), 33–37 (PSRAM octal N16R8),
 //  0/3/46 (arranque). 45 también es de arranque: ver la advertencia del encoder izquierdo.
 // ============================================================================
 #include <stdint.h>
@@ -20,7 +20,7 @@
 // Un EN por lado: une R_EN y L_EN de cada módulo y pon 10 kΩ de EN a GND.
 // RPWM = adelante, LPWM = atrás (si un motor va al revés cambia su INVERT, no los cables).
 constexpr int PIN_L_LPWM = 38;  // ¡en la DevKitC-1 v1.1 el LED RGB de la placa está en el 38!
-constexpr int PIN_L_RPWM = 37;  // ¡ocupado por la PSRAM en módulos N8R8 / N16R8! (ver README)
+constexpr int PIN_L_RPWM = 40;  // era 37: en el módulo N16R8 los GPIO 35–37 son de la PSRAM octal
 constexpr int PIN_L_EN = 39;
 constexpr int PIN_R_LPWM = 16;
 constexpr int PIN_R_RPWM = 15;
