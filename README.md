@@ -61,7 +61,7 @@ rmb-S3-EC-6050/
    (No pongas pull-up externo en el 45; el firmware activa el interno después de arrancar.)
 2. **El módulo es N16R8** (16 MB de flash, 8 MB de PSRAM octal). Dentro del módulo, los GPIO 33–37 van a la PSRAM:
    configurar el 37 como salida reiniciaba la placa en bucle (`rst:0x1 (POWERON)`). Por eso RPWM izq. está en el **40**.
-   `platformio.ini` ya está configurado para N16R8 (flash 16 MB QIO, PSRAM OPI).
+   `platformio.ini` ya está configurado para N16R8 (flash 16 MB QIO). La PSRAM se deja apagada a propósito: el firmware no la necesita.
 3. **LED RGB de la placa**: está en el 48 (DevKitC-1 v1.0) o en el 38 (v1.1). No estorba, solo puede encenderse
    con colores raros. Por eso el LED de estado es uno externo en el 6.
 4. Los encoders y la MPU6050 van a **3.3 V**: el S3 no tolera 5 V en sus entradas.
