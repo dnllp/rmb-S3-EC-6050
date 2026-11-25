@@ -10,6 +10,7 @@ class Brush {
   void begin(int pin, bool activeHigh) {
     pin_ = pin;
     activeHigh_ = activeHigh;
+    write(false);  // primero el nivel de apagado y después salida: sin pulso al arrancar
     pinMode(pin_, OUTPUT);
     write(false);
   }
