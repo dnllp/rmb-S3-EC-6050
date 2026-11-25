@@ -135,6 +135,12 @@ static void telemetryTask(void *) {
 
 // ---------------------------------------------------------------- arranque
 void setup() {
+  // Marca lo antes posible: si no sale en el monitor, el reinicio ocurre antes de llegar aquí
+  // (alimentación o pines de arranque), no en el código del robot.
+  Serial.begin(115200);
+  Serial.printf("\n[roomba-grid-s3] setup() reset=%d\n", (int)esp_reset_reason());
+  Serial.flush();
+
   // Primero, motores en rueda libre (EN 39 y 17 en bajo, PWM en bajo) y barredora apagada
   for (int pin : {PIN_L_EN, PIN_R_EN, PIN_L_RPWM, PIN_L_LPWM, PIN_R_RPWM, PIN_R_LPWM}) {
     pinMode(pin, OUTPUT);
@@ -142,9 +148,8 @@ void setup() {
   }
   brush.begin(PIN_BRUSH, BRUSH_ACTIVE_HIGH);
 
-  Serial.begin(115200);
   delay(100);
-  Serial.println("\n[roomba-grid-s3] arrancando");
+  Serial.println("[roomba-grid-s3] arrancando");
 
   pinMode(PIN_LED, OUTPUT);
   pinMode(PIN_BUTTON, INPUT_PULLUP);
