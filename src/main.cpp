@@ -142,11 +142,19 @@ void setup() {
   Serial.flush();
 
   // Primero, motores en rueda libre (EN 39 y 17 en bajo, PWM en bajo) y barredora apagada
-  for (int pin : {PIN_L_EN, PIN_R_EN, PIN_L_RPWM, PIN_L_LPWM, PIN_R_RPWM, PIN_R_LPWM}) {
+  // Diagnóstico de arranque: imprime cada pin antes de tocarlo. Si la placa se reinicia,
+  // el último número que salga en el monitor es el pin culpable.
+  for (int pin : {PIN_L_EN, PIN_R_EN, PIN_L_RPWM, PIN_L_LPWM, PIN_R_RPWM, PIN_R_LPWM, PIN_BRUSH}) {
+    Serial.printf("[pin] %d\n", pin);
+    Serial.flush();
+    delay(50);
     pinMode(pin, OUTPUT);
     digitalWrite(pin, LOW);
+    delay(50);
   }
   brush.begin(PIN_BRUSH, BRUSH_ACTIVE_HIGH);
+  Serial.println("[pin] todos bien");
+  Serial.flush();
 
   delay(100);
   Serial.println("[roomba-grid-s3] arrancando");
